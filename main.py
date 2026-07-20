@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from fastapi import Response  # üste ekle
+
 
 app = FastAPI()
 
@@ -40,3 +42,20 @@ async def create_task(task: Task):
     new_task["id"] = len(tasks) + 1
     tasks.append(new_task)
     return JSONResponse(status_code=201, content=new_task)
+
+@app.put("/tasks/{task_id}")
+async def update_task(task_id: int, task_data: Task):
+    for task in tasks:
+        if task["id"] == task_id:
+            task["title"] = task_data.title
+            task["done"] = task_data.done
+            return JSONResponse(status_code=200, content=task)
+    return JSONResponse(status_code=404, content={"error": f"Task {task_id} not found"})
+
+@app.delete("/tasks/{task_id}")
+async def delete_task(task_id: int):
+    for task in tasks:
+        if task["id"] == task_id:
+            tasks.remove(task)
+            return Response(status_code=204)
+    return JSONResponse(status_code=404, content={"error": f"Task {task_id} not found"})
