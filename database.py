@@ -1,94 +1,36 @@
-import sqlite3
+import os
+import psycopg
+from psycopg.rows import dict_row
+from dotenv import load_dotenv
 
-DB_NAME = "tasks.db"
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+
+def get_conn():
+    return psycopg.connect(DATABASE_URL, row_factory=dict_row)
+
 
 def init_db():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    # Tablo yoksa oluştur
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS tasks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            done BOOLEAN NOT NULL DEFAULT 0
-        )
-    """)
-
-    # Tablo boşsa 3 örnek task ekle
-    cursor.execute("SELECT COUNT(*) FROM tasks")
-    count = cursor.fetchone()[0]
-
-    if count == 0:
-        cursor.executemany(
-            "INSERT INTO tasks (title, done) VALUES (?, ?)",
-            [
-                ("Buy milk", False),
-                ("Walk the dog", True),
-                ("Learn FastAPI", False),
-            ]
-        )
-
-    conn.commit()
-    conn.close()
-
-def get_all_tasks():
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM tasks")
-    tasks = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return tasks
-
-def get_task(task_id):
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
-    row = cursor.fetchone()
-    conn.close()
-    if row:
-        return dict(row)
-    return None
-
-def create_task(title, done=False):
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO tasks (title, done) VALUES (?, ?)",
-        (title, done)
-    )
-    conn.commit()
-    task_id = cursor.lastrowid
-    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
-    task = dict(cursor.fetchone())
-    conn.close()
-    return task
-
-def update_task(task_id, title, done):
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute(
-        "UPDATE tasks SET title = ?, done = ? WHERE id = ?",
-        (title, done, task_id)
-    )
-    conn.commit()
-    if cursor.rowcount == 0:
-        conn.close()
-        return None
-    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
-    task = dict(cursor.fetchone())
-    conn.close()
-    return task
-
-def delete_task(task_id):
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
-    conn.commit()
-    deleted = cursor.rowcount > 0
-    conn.close()
-    return deleted
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS tasks (
+                    id SERIAL PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    done BOOLEAN NOT NULL DEFAULT FALSE
+                )
+            """)
+            cur.execute("SELECT COUNT(*) FROM tasks")
+            count = cur.fetchone()["count"]
+            if count == 0:
+                cur.executemany(
+                    "INSERT INTO tasks (title, done) VALUES (%s, %s)",
+                    [
+                        ("Buy milk", False),
+                        ("Walk the dog", True),
+                        ("Learn FastAPI", False),
+                    ]
+                )
+        conn.commit()
