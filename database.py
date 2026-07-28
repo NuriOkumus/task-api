@@ -48,3 +48,36 @@ def get_task(task_id):
         with conn.cursor() as cur:
             cur.execute("SELECT * FROM tasks WHERE id = %s", (task_id,))
             return cur.fetchone()
+
+
+def create_task(title, done=False):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO tasks (title, done) VALUES (%s, %s) RETURNING *",
+                (title, done)
+            )
+            task = cur.fetchone()
+        conn.commit()
+    return task
+
+
+def update_task(task_id, title, done):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE tasks SET title = %s, done = %s WHERE id = %s RETURNING *",
+                (title, done, task_id)
+            )
+            task = cur.fetchone()
+        conn.commit()
+    return task
+
+
+def delete_task(task_id):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM tasks WHERE id = %s RETURNING id", (task_id,))
+            deleted = cur.fetchone()
+        conn.commit()
+    return deleted is not None
