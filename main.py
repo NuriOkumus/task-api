@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
-from database import init_db, get_all_tasks, get_task, create_task
+from database import init_db, get_all_tasks, get_task, create_task, update_task, delete_task
 
 
 app = FastAPI()
@@ -48,18 +48,14 @@ async def create_task_endpoint(task: Task):
     return JSONResponse(status_code=201, content=new_task)
 
 @app.put("/tasks/{task_id}")
-async def update_task(task_id: int, task_data: Task):
-    for i, task in enumerate(tasks):
-        if task["id"] == task_id:
-            tasks[i]["title"] = task_data.title
-            tasks[i]["done"] = task_data.done
-            return JSONResponse(status_code=200, content=tasks[i])
+async def update_task_endpoint(task_id: int, task_data: Task):
+    task = update_task(task_id, task_data.title, task_data.done)
+    if task:
+        return task
     return JSONResponse(status_code=404, content={"error": "Task not found"})
 
 @app.delete("/tasks/{task_id}")
-async def delete_task(task_id: int):
-    for task in tasks:
-        if task["id"] == task_id:
-            tasks.remove(task)
-            return Response(status_code=204)
+async def delete_task_endpoint(task_id: int):
+    if delete_task(task_id):
+        return Response(status_code=204)
     return JSONResponse(status_code=404, content={"error": "Task not found"})

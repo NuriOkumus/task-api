@@ -66,3 +66,29 @@ def create_task(title, done=False):
     task = dict(cursor.fetchone())
     conn.close()
     return task
+
+def update_task(task_id, title, done):
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE tasks SET title = ?, done = ? WHERE id = ?",
+        (title, done, task_id)
+    )
+    conn.commit()
+    if cursor.rowcount == 0:
+        conn.close()
+        return None
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    task = dict(cursor.fetchone())
+    conn.close()
+    return task
+
+def delete_task(task_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    conn.commit()
+    deleted = cursor.rowcount > 0
+    conn.close()
+    return deleted
