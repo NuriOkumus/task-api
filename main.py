@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
-from database import init_db
+from database import init_db, get_all_tasks, get_task
 
 
 app = FastAPI()
@@ -38,14 +38,14 @@ tasks = [
 
 @app.get("/tasks")
 async def get_tasks():
-    return tasks
+    return get_all_tasks()
 
 @app.get("/tasks/{task_id}")
-async def get_task(task_id: int):
-    for task in tasks:
-        if task["id"] == task_id:
-            return task
-    return JSONResponse(status_code=404, content={"error": f"Task {task_id} not found"})
+async def get_task_by_id(task_id: int):
+    task = get_task(task_id)
+    if task:
+        return task
+    return JSONResponse(status_code=404, content={"error": "Task not found"})
 
 
 @app.post("/tasks")
