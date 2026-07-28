@@ -34,3 +34,17 @@ def init_db():
                     ]
                 )
         conn.commit()
+
+
+def get_all_tasks():
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM tasks")
+            return cur.fetchall()
+
+
+def get_task(task_id):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM tasks WHERE id = %s", (task_id,))
+            return cur.fetchone()
