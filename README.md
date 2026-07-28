@@ -1,6 +1,6 @@
 # Task API
 
-A simple in-memory CRUD API for managing a to-do list, built with **Python** and **FastAPI**.
+A CRUD API for managing a to-do list, built with **Python**, **FastAPI**, and **SQLite**.
 
 ## How to Run
 
@@ -16,7 +16,25 @@ pip install fastapi uvicorn
 uvicorn main:app --reload
 ```
 
+The database (`tasks.db`) is created automatically on first run. Three example tasks are inserted only once.
+
 Server runs at `http://localhost:8000`
+
+## Database
+
+- **Engine:** SQLite (built into Python, no installation required)
+- **File location:** `tasks.db` in the project root
+- **Auto-created:** Table is created automatically on startup
+- **Seed data:** 3 example tasks are inserted only on the very first run
+
+### Example SQL query
+
+```sql
+-- List all completed tasks
+SELECT * FROM tasks WHERE done = 1;
+```
+
+![SQLite Database](image.png)
 
 ## Endpoints
 
