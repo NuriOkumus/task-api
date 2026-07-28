@@ -1,40 +1,35 @@
 # Task API
 
-A CRUD API for managing a to-do list, built with **Python**, **FastAPI**, and **SQLite**.
+A CRUD API for managing a to-do list, built with **Python**, **FastAPI**, and **PostgreSQL** in **Docker Compose**.
 
-## How to Run
+## One-Command Quickstart
 
 ```bash
-# 1. Create and activate virtual environment
-python3 -m venv venv
-source venv/bin/activate
+# 1. Copy environment variables example
+cp .env.example .env
 
-# 2. Install dependencies
-pip install fastapi uvicorn
-
-# 3. Start the server
-uvicorn main:app --reload
+# 2. Start the entire stack (API + Postgres)
+docker compose up -d
 ```
 
-The database (`tasks.db`) is created automatically on first run. Three example tasks are inserted only once.
+The database (`tasks` inside Postgres container) and table are created automatically on startup. Seed data (3 tasks) is inserted only on first run.
 
 Server runs at `http://localhost:8000`
 
 ## Database
 
-- **Engine:** SQLite (built into Python, no installation required)
-- **File location:** `tasks.db` in the project root
-- **Auto-created:** Table is created automatically on startup
-- **Seed data:** 3 example tasks are inserted only on the very first run
+- **Engine:** PostgreSQL (runs in a Docker container)
+- **Service Name:** `db`
+- **Secrets:** Configured via `.env` / `DATABASE_URL`
+- **Persistence:** Mounts a named Docker volume (`taskdata`) so data survives container restarts
 
-### Example SQL query
+### Example SQL Query (via Docker)
 
-```sql
--- List all completed tasks
-SELECT * FROM tasks WHERE done = 1;
+```bash
+docker exec -it crud-db-1 psql -U postgres -d tasks -c "SELECT * FROM tasks WHERE done = true;"
 ```
 
-![SQLite Database](image.png)
+![Postgres Database Screenshot](image.png)
 
 ## Endpoints
 
@@ -54,7 +49,7 @@ SELECT * FROM tasks WHERE done = 1;
 $ curl -i http://localhost:8000/tasks/1
 
 HTTP/1.1 200 OK
-date: Mon, 20 Jul 2026 11:22:45 GMT
+date: Tue, 28 Jul 2026 18:30:00 GMT
 server: uvicorn
 content-length: 40
 content-type: application/json
