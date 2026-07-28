@@ -1,15 +1,15 @@
 from fastapi import FastAPI, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
+from database import init_db
 
 
 app = FastAPI()
 
-tasks = [
-    {"id": 1, "title": "Buy milk", "done": False},
-    {"id": 2, "title": "Walk the dog", "done": True},
-    {"id": 3, "title": "Learn FastAPI", "done": False},
-]
+@app.on_event("startup")
+def startup():
+    init_db()
+
 
 class Task(BaseModel):
     title: str
@@ -24,11 +24,17 @@ class Task(BaseModel):
 
 @app.get("/")
 async def root():
-    return {"name": "Task API", "version": "1.0", "endpoints": ["/tasks"]}     
+    return {"name": "Task API", "version": "1.0", "endpoints": ["/tasks"]}
 
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+tasks = [
+    {"id": 1, "title": "Buy milk", "done": False},
+    {"id": 2, "title": "Walk the dog", "done": True},
+    {"id": 3, "title": "Learn FastAPI", "done": False},
+]
 
 @app.get("/tasks")
 async def get_tasks():
