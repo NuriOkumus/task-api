@@ -51,3 +51,18 @@ def get_task(task_id):
     if row:
         return dict(row)
     return None
+
+def create_task(title, done=False):
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO tasks (title, done) VALUES (?, ?)",
+        (title, done)
+    )
+    conn.commit()
+    task_id = cursor.lastrowid
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    task = dict(cursor.fetchone())
+    conn.close()
+    return task
