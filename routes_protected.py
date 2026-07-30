@@ -10,3 +10,10 @@ async def profile(user=Depends(get_current_user)):
         "email": user.email,
         "created_at": str(user.created_at),
     }
+
+@router.get("/dashboard")
+async def dashboard(user=Depends(get_current_user)):
+    return {
+        "message": f"Welcome to your dashboard, {user.email}!",
+        "user_id": user.id,
+    }
