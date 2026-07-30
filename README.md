@@ -43,6 +43,7 @@ docker exec -it crud-db-1 psql -U postgres -d tasks -c "SELECT * FROM tasks WHER
 | PUT | `/tasks/{id}` | Update a task | 200, 404 |
 | DELETE | `/tasks/{id}` | Delete a task | 204, 404 |
 
+> **Note:** Invalid requests (e.g. empty title) return HTTP `422 Unprocessable Entity` instead of `400`. This is FastAPI + Pydantic's default behavior — `422` is semantically more accurate here since the JSON is well-formed but the content fails validation.
 ## Example `curl` Output
 
 ```

@@ -1,6 +1,6 @@
 venv/
 __pycache__/
 *.pyc
+*.pdf
 tasks.db
-W3 - Connecting your CRUD to the database.pdf
-W2 - Build your first CRUD API.pdf
+.env
