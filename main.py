@@ -2,14 +2,18 @@ from fastapi import FastAPI, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
 from database import init_db, get_all_tasks, get_task, create_task, update_task, delete_task
-
+from auth import router as auth_router
+from routes_public import router as public_router
+from routes_protected import router as protected_router
 
 app = FastAPI()
+app.include_router(auth_router)
+app.include_router(public_router)
+app.include_router(protected_router)
 
 @app.on_event("startup")
 def startup():
     init_db()
-
 
 class Task(BaseModel):
     title: str
@@ -40,7 +44,6 @@ async def get_task_by_id(task_id: int):
     if task:
         return task
     return JSONResponse(status_code=404, content={"error": "Task not found"})
-
 
 @app.post("/tasks")
 async def create_task_endpoint(task: Task):
