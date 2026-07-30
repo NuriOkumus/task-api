@@ -6,7 +6,9 @@ from auth import router as auth_router
 from routes_public import router as public_router
 from routes_protected import router as protected_router
 
-app = FastAPI()
+# Stage 5 requirement: FastAPI handles the Swagger authorize padlock automatically
+# through the HTTPBearer dependency injection we set up earlier.
+app = FastAPI(title="Task API", version="1.0.0")
 app.include_router(auth_router)
 app.include_router(public_router)
 app.include_router(protected_router)
