@@ -33,15 +33,23 @@ docker exec -it crud-db-1 psql -U postgres -d tasks -c "SELECT * FROM tasks WHER
 
 ## Endpoints
 
-| Method | Endpoint | Description | Status Codes |
-|--------|----------|-------------|--------------|
-| GET | `/` | API info | 200 |
-| GET | `/health` | Health check | 200 |
-| GET | `/tasks` | List all tasks | 200 |
-| GET | `/tasks/{id}` | Get single task | 200, 404 |
-| POST | `/tasks` | Create a task | 201, 422 |
-| PUT | `/tasks/{id}` | Update a task | 200, 404 |
-| DELETE | `/tasks/{id}` | Delete a task | 204, 404 |
+| Method | Endpoint | Description | Status | Auth Required? |
+|--------|----------|-------------|--------|----------------|
+| GET | `/` | API info | 200 | No |
+| GET | `/health` | Health check | 200 | No |
+| GET | `/tasks` | List all tasks | 200 | No |
+| GET | `/tasks/{id}` | Get single task | 200, 404 | No |
+| POST | `/tasks` | Create a task | 201, 422 | No |
+| PUT | `/tasks/{id}` | Update a task | 200, 404 | No |
+| DELETE | `/tasks/{id}` | Delete a task | 204, 404 | No |
+| POST | `/auth/signup` | Create an account | 201, 400 | No |
+| POST | `/auth/login` | Authenticate & get tokens | 200, 400, 401 | No |
+| POST | `/auth/logout` | End user session | 204 | Yes |
+| GET | `/public/info` | Read public data | 200 | No |
+| GET | `/protected/profile`| Read private profile data | 200, 401 | Yes |
+| GET | `/protected/dashboard`| Read private dashboard | 200, 401 | Yes |
+
+> **Security Note:** Endpoints requiring auth must receive the access token via the `Authorization: Bearer <token>` header. Swagger UI at `/docs` supports this natively via the "Authorize" padlock.
 
 > **Note:** Invalid requests (e.g. empty title) return HTTP `422 Unprocessable Entity` instead of `400`. This is FastAPI + Pydantic's default behavior — `422` is semantically more accurate here since the JSON is well-formed but the content fails validation.
 ## Example `curl` Output
