@@ -1,13 +1,12 @@
-from fastapi import APIRouter, HTTPException, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import APIRouter, Depends
+from auth_guard import get_current_user
 
 router = APIRouter(prefix="/protected", tags=["Protected"])
-security = HTTPBearer()
 
 @router.get("/profile")
-async def profile(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    token = credentials.credentials
-    if not token:
-        raise HTTPException(status_code=401, detail="Access token required")
-    # Not returning user info yet as it's not verified
-    return {"message": "Token presented but not verified yet"}
+async def profile(user=Depends(get_current_user)):
+    return {
+        "id": user.id,
+        "email": user.email,
+        "created_at": str(user.created_at),
+    }
